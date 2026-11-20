@@ -1,5 +1,30 @@
 # Day 11 — Controlled Agent Security (2026)
 
+## Bài nộp
+
+| | |
+|---|---|
+| **Họ tên** | Dư Văn Hùng |
+| **MSSV** | 2A202603975 |
+| **Lớp** | K5-L3B |
+| **Red provider / model** | `openai` / `gpt-4o-mini` |
+| **Bonus chọn** | B1 — leak **Red** (`unsafe_attacks` 5/5) |
+
+**Cách chạy (macOS / Linux, từ gốc repo):**
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # điền OPENROUTER_API_KEY + OPENAI_API_KEY
+python src/main.py --part 2   # CP2: guardrails (in terminal)
+python src/main.py --part 3   # CP3: outputs/results.json, audit_log.json, metrics.json
+python src/main.py --part 4   # CP4: outputs/*attack*.json
+pytest tests/smoke tests/public -q
+python scripts/grade.py --submission-dir . --out outputs/grade_report.json
+```
+
+---
+
 > 👤 **Hình thức:** bài tập **cá nhân** (1 người / 1 MSSV).  
 > 🎯 **Mục tiêu:** đóng vai **Blue Team** để học cách xây Guardrails phòng thủ, rồi đóng vai **Red Team** để tấn công agent **Red** hoặc **Red Advance**.  
 > ✅ Làm theo **Checkpoint 1 → 5** trong [`CHECKPOINTS.md`](CHECKPOINTS.md) · nộp theo [`SUBMISSION.md`](SUBMISSION.md).
