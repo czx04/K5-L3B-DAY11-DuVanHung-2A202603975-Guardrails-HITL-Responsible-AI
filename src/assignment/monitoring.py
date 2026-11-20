@@ -1,5 +1,5 @@
 """
-Assignment 11 — Monitoring & Alerts starter (TODO).
+Assignment 11 — Monitoring & Alerts.
 
 Tracks block rate, rate-limit hits, judge fail rate.
 Fires alerts when thresholds are exceeded.
@@ -40,18 +40,33 @@ class MonitoringAlert:
     rate_limit_hits: int = 0
     judge_checks: int = 0
     judge_fails: int = 0
+    redacted_requests: int = 0
+    error_requests: int = 0
 
     def check_metrics(self) -> list[Alert]:
-        """TODO: compute rates, append Alert objects when thresholds exceeded."""
-        raise NotImplementedError("Implement MonitoringAlert.check_metrics")
+        """Append threshold alerts, retaining history without duplicate samples."""
+        metrics = self.snapshot()
+        for metric, threshold in (
+            ("block_rate", self.block_rate_threshold),
+            ("rate_limit_hits", self.rate_limit_hit_threshold),
+            ("judge_fail_rate", self.judge_fail_rate_threshold),
+        ):
+            value = metrics[metric]
+            if value > threshold and not any(
+                a.metric == metric and a.value == value and a.threshold == threshold
+                for a in self.alerts
+            ):
+                self.alerts.append(Alert(
+                    metric, value, threshold, f"{metric} exceeded {threshold}"
+                ))
+        return self.alerts
 
     def export_json(self, filepath: str | None = None):
-        """TODO: write metrics + alerts to JSON under repo-root ``outputs/`` by default.
-        Use ``filepath or default_metrics_path()`` so running from ``src/`` does not
-        create ``src/outputs/``.
-        """
-        _ = filepath or default_metrics_path()
-        raise NotImplementedError("Implement MonitoringAlert.export_json")
+        """Write the current metrics and alerts, creating parent directories."""
+        self.check_metrics()
+        path = Path(filepath or default_metrics_path())
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(self.snapshot(), indent=2), encoding="utf-8")
 
     def snapshot(self) -> dict:
         block_rate = (
@@ -67,6 +82,8 @@ class MonitoringAlert:
             "blocked_requests": self.blocked_requests,
             "block_rate": block_rate,
             "rate_limit_hits": self.rate_limit_hits,
+            "redacted_requests": self.redacted_requests,
+            "error_requests": self.error_requests,
             "judge_checks": self.judge_checks,
             "judge_fails": self.judge_fails,
             "judge_fail_rate": judge_fail_rate,
